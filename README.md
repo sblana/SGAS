@@ -1,2 +1,2 @@
-# GBAS
- Gesture based action system
+# SGAS
+A simple gesture-based action system for Godot.
