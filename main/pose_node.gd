@@ -131,7 +131,6 @@ func start_activation_timer():
 		activation_timer.start(activation_time)
 	else:
 		on_activated()
-	# To be called _on_pc_activated (if _all_active), starting a timer, after which: if _all_active on_activated(), else don't do anything.
 
 
 func start_grace_timer():
@@ -144,7 +143,6 @@ func start_grace_timer():
 		grace_timer.start(grace_time)
 	else:
 		on_deactivated()
-	# To be called _on_pc_deactivated, starting a timer, after which: if _all_active don't do anything, else on_deactivated().
 
 
 func kill_act_timer():
@@ -161,15 +159,12 @@ func on_activated():
 	_active = true
 	emit_signal("pn_activated")
 	get_tree().call_group("sgas_gesturenodes", "on_pose_activated", id)
-	print("pn called on_pose_activated")
-	# Send the activated signal and such.
 
 
 func on_deactivated():
 	_active = false
 	emit_signal("pn_deactivated")
 	get_tree().call_group("sgas_gesturenodes", "on_pose_deactivated", id)
-	# Send the deactivated signal and such.
 
 
 func _on_request_enable_pose(gestureid:StringName, poseid:StringName):

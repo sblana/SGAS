@@ -88,8 +88,6 @@ func on_pose_deactivated(poseid:StringName):
 				get_tree().call_group("sgas_posenodes", "_on_request_disable_pose", self.id, poseid)
 				prepare_next_event()
 				return
-			# else: unexpected result
-		# else: unexpected result
 
 
 func start_min_timer(event_index:int): # similar to pose_activated
