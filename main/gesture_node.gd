@@ -1,4 +1,4 @@
-class_name SGASGestureControl
+class_name SGASGestureNode
 extends Node
 
 
