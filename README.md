@@ -10,4 +10,4 @@ This is a set of scripts for Godot XR, providing the core functionality of a ges
 I have developed this on PCVR (CV1) whilst using XRTools. As far as I'm aware there should be no issue using this without XRTools or using this on standalone VR, but I cannot attest this.<br>
 I am new to Godot and programming in general, so some things may be completely non-sensical.<br>
 
-LLet me know if you have any suggestions, questions, or other such. You can find me in the Godot discord server (@pisslover72).
+Let me know if you have any suggestions, questions, or other such. You can find me in the Godot discord server (@pisslover72).
