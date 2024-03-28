@@ -1,7 +1,7 @@
 # SGAS
-This is an addon for Godot XR, providing the core functionality of a gesture-based action system. Note that this is not gesture recognition.
+This is a set of scripts for Godot XR, providing the core functionality of a gesture-based action system. Note that this is not gesture recognition.
 
-**S**imple **G**esture-based **A**ction **S**tstem uses ShapeCasts that must be collided with in a specific order, to then activate an action.<br>
+**S**imple **G**esture-based **A**ction **S**ystem uses ShapeCasts that must be collided with in a specific order, to then activate an action.<br>
 - **PoseNodes** represent poses. They communicate with their PoseComponents, and release signals.<br>
 - Each PoseNode must have at least one child **PoseComponent**. They use ShapeCasts and determine whether the colliding nodes match the set conditions.<br>
 - **GestureNodes** communicate which PoseNodes they each want enabled, and emit a signal when certain events have passed (e.g. certain poses activated, and certain amount of time passed).<br>
