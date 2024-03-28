@@ -1,4 +1,5 @@
-class_name GBASPoseComponent
+@tool
+class_name SGASPoseComponent
 extends Node3D
 
 
@@ -9,36 +10,68 @@ signal pc_activated
 signal pc_deactivated
 
 
-#@export_flags("0","1","2","3","4","5","6","7") var component_layer
-@export var component_mask : Array[String]
+@export var sgas_id_mask : Array[String] ## Only colliders with any of these as their sgas_id metadata are considered valid.
 @export_group("Conditions")
 @export var rotation_range := 0.0 ## Leave at 0.0 if you don't want to require a collider to have a specific rotation.
 #@export_subgroup("Velocity conditions)
 #@export var linear_velocity_min
 
 
-var inside : bool
-var do_conditions_testing : bool
-var active : bool
-var _colliders_previous : Array
-var _colliders_current : Array
-
-# temp shapecast3d
-@onready var _shapecast : ShapeCast3D
+var inside : bool ## Whether a valid collider is inside this node's ShapeCast.
+var do_conditions_testing : bool 
+var active : bool 
+var _shapecast : ShapeCast3D 
+var _colliders_previous : Array 
+var _colliders_current : Array 
 
 
-func _ready():
-	for child in get_children():
-		if child is ShapeCast3D:
-			_shapecast = child
-			break
+
+func _enter_tree():
+	if Engine.is_editor_hint():
+		return
 	var parent = get_parent()
 	if parent.has_method("components_updated"):
 		parent.components_updated()
 
 
+func _exit_tree():
+	if Engine.is_editor_hint():
+		return
+	var parent = get_parent()
+	if parent.has_method("components_updated"):
+		tree_exited.connect(parent.components_updated, CONNECT_ONE_SHOT)
+
+
+func _ready():
+	if Engine.is_editor_hint():
+		return
+	for child in get_children():
+		if child is ShapeCast3D:
+			_shapecast = child
+			break
+
+
+func _get_configuration_warnings() -> PackedStringArray:
+	var warnings := PackedStringArray()
+	
+	var s := false
+	for child in get_children():
+		if child is ShapeCast3D:
+			s = true
+			break
+	if not s:
+		warnings.append("This node needs a ShapeCast3D to function.")
+	
+	if not get_parent() is SGASPoseNode:
+		warnings.append("This node needs to be a child of a SGASPoseNode to function.")
+	
+	return warnings
+
+
 # Collision is using a child ShapeCast3D in the GBAS physics layer (16). That ShapeCast3D does not need a script, as this node will call its methods and such.
 func _physics_process(_delta):
+	if Engine.is_editor_hint():
+		return
 	colliders_update()
 	
 	if inside and do_conditions_testing:
@@ -56,7 +89,7 @@ func colliders_update():
 		for i in _shapecast.get_collision_count():
 			var collider = _shapecast.get_collider(i)
 			# Check if the collider has a gbas_layer that's in our mask
-			if collider.has_meta("gbas_layer") and collider.get_meta("gbas_layer") in component_mask:
+			if collider.has_meta("gbas_layer") and collider.get_meta("gbas_layer") in sgas_id_mask:
 				# Check if entry velocity matches conditions
 				_colliders_current.append(collider)
 	

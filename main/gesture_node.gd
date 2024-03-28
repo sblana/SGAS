@@ -1,16 +1,19 @@
-class_name GBASActionControl
+class_name SGASGestureControl
 extends Node
 
-signal action_reset
-signal action_activated
+
+
+signal gesture_reset
+signal gesture_activated
 
 @export var id : StringName
-@export var events : Array[GBASGestureEvent]
+@export var events : Array[SGASGestureEvent] ## Sequence of events that need to occur for this GestureNode to be activated.
 
 var event_timer : Timer
 enum EVENT_STATE{CURRENT, PASSED}
 var _past_events_state : Array[EVENT_STATE]
 var _next_event : int
+
 
 func _ready():
 	event_timer = Timer.new()
@@ -18,18 +21,17 @@ func _ready():
 	event_timer.one_shot = true
 	event_timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
 	add_child(event_timer)
-	# dont start timer or timeout.connect() now: timer is used first for minimum_time and then maximum_time
-	add_to_group("gbas_actioncontrols")
+	add_to_group("sgas_gesturenodes")
 	prepare_next_event()
 
 
 func reset():
-	emit_signal("action_reset")
+	emit_signal("gesture_reset")
 	_past_events_state.clear()
 	_next_event = 0
 	for event in events:
 		if event.event_type == 0:
-			get_tree().call_group("gbas_posenodes", "_on_request_disable_pose", self.id, event.pose_id)
+			get_tree().call_group("sgas_posenodes", "_on_request_disable_pose", self.id, event.pose_id)
 	prepare_next_event()
 
 
@@ -38,14 +40,13 @@ func prepare_next_event():
 		activate()
 		reset()
 	elif events[_next_event].event_type == 0: # if next event is a pose
-		get_tree().call_group("gbas_posenodes", "_on_request_enable_pose", self.id, events[_next_event].pose_id)
+		get_tree().call_group("sgas_posenodes", "_on_request_enable_pose", self.id, events[_next_event].pose_id)
 	elif events[_next_event].event_type == 1: # if next event is a timer
 		start_min_timer(_next_event)
-	# call after pose_deactivated(), min_timeout(), or after reset
 
 
 func activate():
-	emit_signal("action_activated")
+	emit_signal("gesture_activated")
 
 
 func unexpected_pose():
@@ -53,7 +54,6 @@ func unexpected_pose():
 
 
 func on_pose_activated(poseid:StringName):
-	print("ac on_pose_activated")
 	if not events[_next_event].event_type == 0: # enum POSE
 		unexpected_pose()
 		return
@@ -74,7 +74,7 @@ func on_pose_activated(poseid:StringName):
 		_past_events_state.append(EVENT_STATE.CURRENT)
 		_next_event += 1
 		if not events[_next_event - 1].holdable:
-			get_tree().call_group("gbas_posenodes", "_on_request_disable_pose", self.id, events[_next_event - 1].pose_id)
+			get_tree().call_group("sgas_posenodes", "_on_request_disable_pose", self.id, events[_next_event - 1].pose_id)
 		return
 
 
@@ -85,7 +85,7 @@ func on_pose_deactivated(poseid:StringName):
 		if events[_next_event - 1].pose_id == poseid: #if last event is the same as the pose that was deactivated
 			if _past_events_state[_next_event - 1] == EVENT_STATE.CURRENT: #if last event is marked as active ('current')
 				_past_events_state[_next_event - 1] = EVENT_STATE.PASSED #mark last event as not active ('passed')
-				get_tree().call_group("gbas_posenodes", "_on_request_disable_pose", self.id, poseid)
+				get_tree().call_group("sgas_posenodes", "_on_request_disable_pose", self.id, poseid)
 				prepare_next_event()
 				return
 			# else: unexpected result
@@ -99,7 +99,6 @@ func start_min_timer(event_index:int): # similar to pose_activated
 		event_timer.timeout.connect(min_timeout, CONNECT_ONE_SHOT)
 		event_timer.start(events[event_index].minimum_time)
 	else: min_timeout()
-	# starts timer; grabs properties from events:Array with the given index. call only when _past_events_state[_next_event - 1] is PASSED.
 
 
 func min_timeout(): # similar to pose_deactivated
@@ -112,7 +111,6 @@ func start_max_timer(event_index:int):
 	if events[event_index].maximum_time:
 		event_timer.timeout.connect(max_timeout, CONNECT_ONE_SHOT)
 		event_timer.start(events[event_index].maximum_time)
-	# starts timer; grabs properties from events:Array with the given index. call only when _past_events_state[_next_event - 1] is PASSED.
 
 
 func max_timeout():

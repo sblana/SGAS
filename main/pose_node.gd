@@ -1,4 +1,5 @@
-class_name GBASPoseNode
+@tool
+class_name SGASPoseNode
 extends Node3D
 
 
@@ -11,29 +12,47 @@ signal enable_pc
 signal disable_pc
 
 
-@export var id : StringName
-@export var activation_time := 0.0 ## When >0, requires this pose to be active for the set length, before it sends the pn_activated signal.
-@export var grace_time := 0.0 ## When a child PoseComponent has been deactivated, a timer for the set length is started. The pn_deactivated signal will only be emitted if this PoseNode is still deactivated when the timer runs out.
-@export var synchronised_components := true ## Synchronisation waits for all child PoseComponents to have been entered before in state [cb]inside[/cb].[br]If false, this node will instead be in state [cb]inside[/cb] when at least 1 child PoseComponent is entered.
-@export_group("Debug settings")
+@export var id : StringName ## Unique ID.
+@export var activation_time := 0.0 ## When >0, [code]_active[/code] has to be true for the set length before emitting the [code]pn_activated[/code] signal.
+@export var grace_time := 0.0 ## When >0, [code]_active[/code] has to be false for the set length before emitting the [code]pn_deactivated[/code] signal.
+@export var synchronised_components := true ## Synchronisation waits for all child PoseComponents to be in the state [code]inside[/code] before entering the state [code]inside[/code].[br]If false, this node will instead enter the state [code]inside[/code] when at least 1 child PoseComponent is entered.
+#@export_group("Debug settings")
 
 
 var activation_timer : Timer
 var grace_timer : Timer
-var _all_active : bool
+var _all_active : bool ## Whether all child PoseComponents are active.
 var _inside : bool
 var _active : bool
-var _children_pc : Array[GBASPoseComponent]
-var _actions : Array[StringName] # actions that want this pose enabled
-var _enable_next : bool
+var _children_pc : Array[SGASPoseComponent]
+var _gesturenodes : Array[StringName] ## Array of GestureNodes that want this pose enabled.
+var _enable_next_frame : bool
 
 
 func _ready():
-	add_to_group("gbas_posenodes")
+	if Engine.is_editor_hint():
+		return
+	add_to_group("sgas_posenodes")
+
+
+func _get_configuration_warnings() -> PackedStringArray:
+	var warnings := PackedStringArray()
+	
+	var pc := false
+	for child in get_children():
+		if child is SGASPoseComponent:
+			pc = true
+			break
+	if not pc:
+		warnings.append("This node needs at least one child SGASPoseComponent to function.")
+		
+	return warnings
 
 
 func _physics_process(_delta):
-	if _enable_next:
+	if Engine.is_editor_hint():
+		return
+	if _enable_next_frame:
 		emit_signal("enable_pc")
 	else:
 		emit_signal("disable_pc")
@@ -43,7 +62,7 @@ func components_updated():
 	var c = get_children()
 	_children_pc.clear()
 	for child in c:
-		if child is GBASPoseComponent:
+		if child is SGASPoseComponent:
 			_children_pc.append(child)
 			
 			if not pn_entered.is_connected(child._on_pn_entered):
@@ -141,7 +160,7 @@ func kill_grace_timer():
 func on_activated():
 	_active = true
 	emit_signal("pn_activated")
-	get_tree().call_group("gbas_actioncontrols", "on_pose_activated", id)
+	get_tree().call_group("sgas_gesturenodes", "on_pose_activated", id)
 	print("pn called on_pose_activated")
 	# Send the activated signal and such.
 
@@ -149,25 +168,25 @@ func on_activated():
 func on_deactivated():
 	_active = false
 	emit_signal("pn_deactivated")
-	get_tree().call_group("gbas_actioncontrols", "on_pose_deactivated", id)
+	get_tree().call_group("sgas_gesturenodes", "on_pose_deactivated", id)
 	# Send the deactivated signal and such.
 
 
-func _on_request_enable_pose(actionid:StringName, poseid:StringName):
+func _on_request_enable_pose(gestureid:StringName, poseid:StringName):
 	if not id == poseid:
 		return
 	else:
-		if actionid not in _actions:
-			_actions.append(actionid)
-		_enable_next = true
+		if gestureid not in _gesturenodes:
+			_gesturenodes.append(gestureid)
+		_enable_next_frame = true
 
 
-func _on_request_disable_pose(actionid:StringName, poseid:StringName):
+func _on_request_disable_pose(gestureid:StringName, poseid:StringName):
 	if not id == poseid:
 		return
 	else:
-		_actions.erase(actionid)
-		if not _actions.size():
-			_enable_next = false
+		_gesturenodes.erase(gestureid)
+		if not _gesturenodes.size():
+			_enable_next_frame = false
 		else:
-			_enable_next = true
+			_enable_next_frame = true

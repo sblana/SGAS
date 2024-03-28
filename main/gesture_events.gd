@@ -1,4 +1,4 @@
-class_name GBASGestureEvent
+class_name SGASGestureEvent
 extends Resource
 
 @export_enum("POSE", "TIME") var event_type
