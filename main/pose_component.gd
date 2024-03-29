@@ -136,6 +136,8 @@ func _on_pn_entered():
 
 func _on_pn_exited():
 	do_conditions_testing = false
+	if active:
+		on_deactivated()
 
 
 func on_activated():

@@ -105,7 +105,7 @@ func _on_pc_exited():
 
 func _on_pc_activated():
 	for child in _children_pc:
-		if !child.inside:
+		if !child.active:
 			return
 	_all_active = true
 	kill_grace_timer()
@@ -162,6 +162,7 @@ func on_activated():
 
 
 func on_deactivated():
+	kill_grace_timer()
 	_active = false
 	emit_signal("pn_deactivated")
 	get_tree().call_group("sgas_gesturenodes", "on_pose_deactivated", id)
