@@ -68,7 +68,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 	return warnings
 
 
-# Collision is using a child ShapeCast3D in the GBAS physics layer (16). That ShapeCast3D does not need a script, as this node will call its methods and such.
+# Collision is using a child ShapeCast3D. That ShapeCast3D does not need a script, as this node will call its methods and such.
 func _physics_process(_delta):
 	if Engine.is_editor_hint():
 		return
@@ -88,8 +88,8 @@ func colliders_update():
 	if _shapecast.is_colliding():
 		for i in _shapecast.get_collision_count():
 			var collider = _shapecast.get_collider(i)
-			# Check if the collider has a gbas_layer that's in our mask
-			if collider.has_meta("gbas_layer") and collider.get_meta("gbas_layer") in sgas_id_mask:
+			# Check if the collider has a sgas_id that's in our mask
+			if collider.has_meta("sgas_id") and collider.get_meta("sgas_id") in sgas_id_mask:
 				# Check if entry velocity matches conditions
 				_colliders_current.append(collider)
 	
