@@ -1,0 +1,52 @@
+[gd_scene load_steps=5 format=3 uid="uid://nxey5obeyrsw"]
+
+[ext_resource type="Script" path="res://SGAS/main/pose_node.gd" id="1_mmjxi"]
+[ext_resource type="Script" path="res://SGAS/main/pose_component.gd" id="2_488y6"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_ih26v"]
+margin = 0.01
+radius = 0.1
+
+[sub_resource type="BoxMesh" id="BoxMesh_hh6wg"]
+size = Vector3(0.01, 0.01, 0.1)
+
+[node name="PNMakeRedEnd" type="Node3D"]
+script = ExtResource("1_mmjxi")
+id = &"make_red_end"
+activation_time = 0.1
+
+[node name="PCLeft" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, -0.15, 1.3, -0.25)
+script = ExtResource("2_488y6")
+sgas_id_mask = Array[String](["left_hand"])
+rotation_range = 30.0
+
+[node name="ShapeCast3D" type="ShapeCast3D" parent="PCLeft"]
+shape = SubResource("SphereShape3D_ih26v")
+target_position = Vector3(0, 0, 0)
+collision_mask = 32768
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="debug_stick" type="MeshInstance3D" parent="PCLeft"]
+layers = 32768
+mesh = SubResource("BoxMesh_hh6wg")
+skeleton = NodePath("../../../PNMakeRedStart/PCLeft")
+
+[node name="PCRight" type="Node3D" parent="."]
+transform = Transform3D(-4.37114e-08, 1, 0, -0.965926, -5.86344e-08, 0.258819, 0.258819, 7.72552e-09, 0.965926, 0.15, 1.45, -0.42)
+script = ExtResource("2_488y6")
+sgas_id_mask = Array[String](["right_hand"])
+rotation_range = 35.0
+
+[node name="ShapeCast3D" type="ShapeCast3D" parent="PCRight"]
+shape = SubResource("SphereShape3D_ih26v")
+target_position = Vector3(0, 0, 0)
+collision_mask = 32768
+collide_with_areas = true
+collide_with_bodies = false
+
+[node name="debug_stick" type="MeshInstance3D" parent="PCRight"]
+layers = 32768
+mesh = SubResource("BoxMesh_hh6wg")
+skeleton = NodePath("../../../PNMakeRedStart/PCLeft")

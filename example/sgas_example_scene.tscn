@@ -1,0 +1,101 @@
+[gd_scene load_steps=20 format=3 uid="uid://dslyou0sntfie"]
+
+[ext_resource type="Script" path="res://SGAS/example/other/main.gd" id="1_qdigx"]
+[ext_resource type="PackedScene" uid="uid://b5hfe08qwdyvd" path="res://SGAS/example/other/xr_player.tscn" id="2_o0u7l"]
+[ext_resource type="PackedScene" uid="uid://bf0crawuom368" path="res://SGAS/example/other/camera_body_transform_getter.tscn" id="3_4nbn8"]
+[ext_resource type="Script" path="res://SGAS/example/redmakingaction.gd" id="4_80dcj"]
+[ext_resource type="PackedScene" uid="uid://bkgqyo5ehl3uq" path="res://SGAS/example/poses/sgas_make_red_start.tscn" id="4_tssnm"]
+[ext_resource type="Script" path="res://SGAS/main/gesture_node.gd" id="5_63aca"]
+[ext_resource type="PackedScene" uid="uid://nxey5obeyrsw" path="res://SGAS/example/poses/sgas_make_red_end.tscn" id="5_splo7"]
+[ext_resource type="Script" path="res://SGAS/main/gesture_events.gd" id="6_h4vpc"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_54iai"]
+albedo_color = Color(0.576471, 0.576471, 0.576471, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_h2xcm"]
+material = SubResource("StandardMaterial3D_54iai")
+size = Vector2(20, 20)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1h4qf"]
+margin = 0.01
+size = Vector3(20, 1, 20)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2iye2"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_d5hgt"]
+material = SubResource("StandardMaterial3D_2iye2")
+
+[sub_resource type="Resource" id="Resource_adryk"]
+script = ExtResource("6_h4vpc")
+event_type = 0
+pose_id = &"make_red_start"
+holdable = true
+minimum_time = 0.0
+maximum_time = 0.0
+
+[sub_resource type="Resource" id="Resource_1vf2x"]
+script = ExtResource("6_h4vpc")
+event_type = 1
+pose_id = &""
+holdable = true
+minimum_time = 0.0
+maximum_time = 1.0
+
+[sub_resource type="Resource" id="Resource_kvq07"]
+script = ExtResource("6_h4vpc")
+event_type = 0
+pose_id = &"make_red_end"
+holdable = false
+minimum_time = 0.0
+maximum_time = 0.0
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_xmc4v"]
+sky_energy_multiplier = 1.5
+
+[sub_resource type="Sky" id="Sky_3c3kr"]
+sky_material = SubResource("ProceduralSkyMaterial_xmc4v")
+
+[sub_resource type="Environment" id="Environment_1fsm8"]
+background_mode = 2
+sky = SubResource("Sky_3c3kr")
+
+[node name="SGASExampleScene" type="Node3D"]
+script = ExtResource("1_qdigx")
+
+[node name="floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="floor"]
+mesh = SubResource("PlaneMesh_h2xcm")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="floor"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+shape = SubResource("BoxShape3D_1h4qf")
+
+[node name="XRPlayer" parent="." instance=ExtResource("2_o0u7l")]
+
+[node name="CameraBodyTransformGetter" parent="XRPlayer" node_paths=PackedStringArray("camera") instance=ExtResource("3_4nbn8")]
+camera = NodePath("../XRCamera3D")
+
+[node name="PNMakeRedStart" parent="XRPlayer/CameraBodyTransformGetter" instance=ExtResource("4_tssnm")]
+
+[node name="PNMakeRedEnd" parent="XRPlayer/CameraBodyTransformGetter" instance=ExtResource("5_splo7")]
+
+[node name="iwanttomakethisred" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, -4.37114e-08, -0.5, 0, 1, -2.18557e-08, 0, 1, -2)
+mesh = SubResource("PlaneMesh_d5hgt")
+script = ExtResource("4_80dcj")
+active_length = 2.0
+
+[node name="GNMakeRed" type="Node" parent="iwanttomakethisred"]
+script = ExtResource("5_63aca")
+id = &"make_red"
+events = Array[ExtResource("6_h4vpc")]([SubResource("Resource_adryk"), SubResource("Resource_1vf2x"), SubResource("Resource_kvq07")])
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_1fsm8")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="WorldEnvironment"]
+transform = Transform3D(0.5, -0.638123, 0.585491, 0, 0.676066, 0.736841, -0.866025, -0.36842, 0.338033, 0, 0, 0)
+
+[editable path="XRPlayer"]

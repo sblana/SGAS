@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://b5hfe08qwdyvd"]
+
+[ext_resource type="PackedScene" uid="uid://bsxh6dcw8paen" path="res://SGAS/example/sgas_collider.tscn" id="7_gawib"]
+
+[node name="XROrigin3D" type="XROrigin3D"]
+current = true
+
+[node name="XRControllerLeft" type="XRController3D" parent="."]
+tracker = &"left_hand"
+
+[node name="SGASColliderLeft" parent="XRControllerLeft" instance=ExtResource("7_gawib")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.03, -0.05, 0.1)
+metadata/sgas_id = "left_hand"
+
+[node name="XRControllerRight" type="XRController3D" parent="."]
+tracker = &"right_hand"
+
+[node name="SGASColliderRight" parent="XRControllerRight" instance=ExtResource("7_gawib")]
+metadata/sgas_id = "right_hand"
+
+[node name="XRCamera3D" type="XRCamera3D" parent="."]
