@@ -21,12 +21,12 @@ signal disable_pc
 
 var activation_timer : Timer
 var grace_timer : Timer
+var enable_next_frame : bool
 var _all_active : bool ## Whether all child PoseComponents are active.
 var _inside : bool
 var _active : bool
 var _children_pc : Array[SGASPoseComponent]
 var _gesturenodes : Array[StringName] ## Array of GestureNodes that want this pose enabled.
-var _enable_next_frame : bool
 
 
 func _ready():
@@ -52,7 +52,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 func _physics_process(_delta):
 	if Engine.is_editor_hint():
 		return
-	if _enable_next_frame:
+	if enable_next_frame:
 		emit_signal("enable_pc")
 	else:
 		emit_signal("disable_pc")
@@ -174,7 +174,7 @@ func _on_request_enable_pose(gestureid:StringName, poseid:StringName):
 	else:
 		if gestureid not in _gesturenodes:
 			_gesturenodes.append(gestureid)
-		_enable_next_frame = true
+		enable_next_frame = true
 
 
 func _on_request_disable_pose(gestureid:StringName, poseid:StringName):
@@ -183,6 +183,6 @@ func _on_request_disable_pose(gestureid:StringName, poseid:StringName):
 	else:
 		_gesturenodes.erase(gestureid)
 		if not _gesturenodes.size():
-			_enable_next_frame = false
+			enable_next_frame = false
 		else:
-			_enable_next_frame = true
+			enable_next_frame = true
