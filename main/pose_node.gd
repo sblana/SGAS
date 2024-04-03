@@ -33,6 +33,8 @@ func _ready():
 	if Engine.is_editor_hint():
 		return
 	add_to_group("sgas_posenodes")
+	on_activated() # flash on/off to make sure all gestures are reset
+	on_deactivated()
 
 
 func _get_configuration_warnings() -> PackedStringArray:
